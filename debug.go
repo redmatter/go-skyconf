@@ -13,17 +13,17 @@ type anyFormatter struct {
 func (a anyFormatter) ParameterName(parts []string) string {
 	var sb strings.Builder
 
-	sb.WriteString("[")
+	sb.WriteString("[ ")
 
 	first := true
 	for _, f := range a.formatters {
 		if !first {
-			sb.WriteString(",")
+			sb.WriteString(", ")
 		}
 		sb.WriteString(f.ID() + ":" + f.ParameterName(parts))
 		first = false
 	}
-	sb.WriteString("]")
+	sb.WriteString(" ]")
 
 	return sb.String()
 }
@@ -47,7 +47,7 @@ func String(cfg interface{}, withUntagged bool, formatters ...Formatter) (str st
 
 	// Make formatter func
 	format := func(source string, parts []string, sb *strings.Builder) error {
-		// Get the formatters for the source if specified.
+		// Get the formatter for the source if specified.
 		var f Formatter
 		if source != "" {
 			for _, f = range formatters {
@@ -84,7 +84,7 @@ func String(cfg interface{}, withUntagged bool, formatters ...Formatter) (str st
 		if err = format(field.options.source, field.nameParts, &sb); err != nil {
 			return
 		}
-		sb.WriteString(": ")
+		sb.WriteString(" -> ")
 		sb.WriteString(fmt.Sprintf("%+v", field.options))
 		first = false
 	}
