@@ -28,7 +28,7 @@ type fieldOptions struct {
 	source       string
 }
 
-var ErrInvalidStruct = errors.New("config1 must be a pointer to a struct")
+var ErrInvalidStruct = errors.New("config must be a pointer to a struct")
 var ErrBadTags = errors.New("error parsing tags for field")
 
 // extractFields uses reflection to examine the struct and extract the fields.
