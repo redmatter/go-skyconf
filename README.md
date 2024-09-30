@@ -1,6 +1,6 @@
 # Ský Config for Go
 
-Ský Config is a configuration library for Go. It cab be used to load configuration
+Ský Config is a configuration library for Go. It can be used to load configuration
 values from cloud based parameter stores such as AWS SSM Parameter Store.
 
 > ### Ský, why?
