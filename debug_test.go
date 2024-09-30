@@ -9,7 +9,7 @@ func TestString(t *testing.T) {
 	type args struct {
 		cfg          interface{}
 		withUntagged bool
-		formatters   []Formatter
+		sources      []Source
 	}
 	tests := []struct {
 		name    string
@@ -18,11 +18,11 @@ func TestString(t *testing.T) {
 		wantErr assert.ErrorAssertionFunc
 	}{
 		{
-			name: "no formatters",
+			name: "no sources",
 			args: args{
 				cfg:          struct{}{},
 				withUntagged: false,
-				formatters:   nil,
+				sources:      nil,
 			},
 			wantStr: "",
 			wantErr: assert.Error,
@@ -39,21 +39,21 @@ func TestString(t *testing.T) {
 					} `sky:"db"`
 				}{},
 				withUntagged: false,
-				formatters: []Formatter{
+				sources: []Source{
 					SSMSourceWithID(nil, "/path/global", "global"),
-					SSMSourceWithID(nil, "/path/region1", "region"),
+					SSMSourceWithID(nil, "/path/region1", "regional"),
 				},
 			},
-			wantStr: "region:/path/region1/db/host: {defaultValue:localhost optional:false flatten:false source:region}\n" +
-				"anyOf:[global:/path/global/db/port,region:/path/region1/db/port]: {defaultValue:5432 optional:true flatten:false source:}\n" +
-				"global:/path/global/db/password: {defaultValue: optional:false flatten:false source:global}",
+			wantStr: "regional:/path/region1/db/host -> {defaultValue:localhost optional:false flatten:false source:region}\n" +
+				"anyOf:[ global:/path/global/db/port, regional:/path/region1/db/port ] -> {defaultValue:5432 optional:true flatten:false source:}\n" +
+				"global:/path/global/db/password -> {defaultValue: optional:false flatten:false source:global}",
 			wantErr: assert.NoError,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotStr, err := String(tt.args.cfg, tt.args.withUntagged, tt.args.formatters...)
+			gotStr, err := String(tt.args.cfg, tt.args.withUntagged, tt.args.sources...)
 			if !tt.wantErr(t, err) {
 				return
 			}

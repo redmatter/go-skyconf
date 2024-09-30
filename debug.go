@@ -1,13 +1,17 @@
 package skyconf
 
 import (
+	"context"
 	"fmt"
 	"strings"
 )
 
-// anyFormatter is a formatter that can use any of the provided formatters.
 type anyFormatter struct {
-	formatters []Formatter
+	sources []Source
+}
+
+func (a anyFormatter) Source(_ context.Context, _ []string) (values map[string]string, err error) {
+	panic("not implemented")
 }
 
 func (a anyFormatter) ParameterName(parts []string) string {
@@ -16,7 +20,7 @@ func (a anyFormatter) ParameterName(parts []string) string {
 	sb.WriteString("[ ")
 
 	first := true
-	for _, f := range a.formatters {
+	for _, f := range a.sources {
 		if !first {
 			sb.WriteString(", ")
 		}
@@ -32,25 +36,22 @@ func (a anyFormatter) ID() string {
 	return "anyOf"
 }
 
-func String(cfg interface{}, withUntagged bool, formatters ...Formatter) (str string, err error) {
-	// Print the config struct and its fields along with their tags and parameter names.
-	// If withUntagged is true, untagged fields will also be printed.
-	// If formatters are provided, the parameter names will be formatted using the provided formatters. Otherwise, a nilFormatter will be used.
-
+// String returns a string representation of the provided configuration struct.
+func String(cfg interface{}, withUntagged bool, sources ...Source) (str string, err error) {
 	// Ensure we have a formatter.
-	if len(formatters) == 0 {
-		err = fmt.Errorf("no formatters provided")
+	if len(sources) == 0 {
+		err = fmt.Errorf("no sources provided")
 		return
 	}
 
-	af := anyFormatter{formatters}
+	af := anyFormatter{sources}
 
 	// Make formatter func
 	format := func(source string, parts []string, sb *strings.Builder) error {
 		// Get the formatter for the source if specified.
-		var f Formatter
+		var f Source
 		if source != "" {
-			for _, f = range formatters {
+			for _, f = range sources {
 				if f.ID() == source {
 					break
 				}
