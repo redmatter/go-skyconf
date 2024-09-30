@@ -9,11 +9,12 @@ import (
 
 func Test_parseTag(t *testing.T) {
 	tests := []struct {
-		name    string
-		tag     string
-		wantKey string
-		wantF   fieldOptions
-		wantErr assert.ErrorAssertionFunc
+		name          string
+		tag           string
+		parentOptions fieldOptions
+		wantKey       string
+		wantF         fieldOptions
+		wantErr       assert.ErrorAssertionFunc
 	}{
 		{
 			name:    "empty tag",
@@ -74,10 +75,40 @@ func Test_parseTag(t *testing.T) {
 			tag:     ",source:",
 			wantErr: assert.Error,
 		},
+		{
+			name: "inherit parent option for 'source'",
+			tag:  "key",
+			parentOptions: fieldOptions{
+				defaultValue: "default",
+				optional:     true,
+				flatten:      true,
+				source:       "parent-source",
+			},
+			wantKey: "key",
+			wantF: fieldOptions{
+				source: "parent-source",
+			},
+			wantErr: assert.NoError,
+		},
+		{
+			name: "inherit parent options, but attribute options take precedence",
+			tag:  "key,source:my-source",
+			parentOptions: fieldOptions{
+				defaultValue: "default",
+				optional:     true,
+				flatten:      true,
+				source:       "parent-source",
+			},
+			wantKey: "key",
+			wantF: fieldOptions{
+				source: "my-source",
+			},
+			wantErr: assert.NoError,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotKey, gotF, err := parseTag(tt.tag)
+			gotKey, gotF, err := parseTag(tt.tag, tt.parentOptions)
 			if !tt.wantErr(t, err, "parseTag(%v)", tt.tag) {
 				return
 			}
@@ -369,14 +400,14 @@ func Test_extractFields(t *testing.T) {
 	target = &struct {
 		Field1 string `sky:"field1,source:"`
 	}{}
-	_, err = extractFields(true, nil, target)
+	_, err = extractFields(true, nil, target, fieldOptions{})
 	assert.Error(t, err)
 
 	// Bad config; not a struct
 	err = nil
 	targetStr := "not a struct"
 	target = &targetStr
-	_, err = extractFields(true, nil, target)
+	_, err = extractFields(true, nil, target, fieldOptions{})
 	assert.Error(t, err)
 
 	// Bad config; not a pointer to a struct
@@ -384,7 +415,7 @@ func Test_extractFields(t *testing.T) {
 	target = struct {
 		Field1 string `sky:"field1"`
 	}{}
-	_, err = extractFields(true, nil, target)
+	_, err = extractFields(true, nil, target, fieldOptions{})
 	assert.Error(t, err)
 
 	// Uninitialised struct field will be initialised with zero value
@@ -399,7 +430,7 @@ func Test_extractFields(t *testing.T) {
 	}
 
 	target = &AConfig{}
-	_, err = extractFields(true, nil, target)
+	_, err = extractFields(true, nil, target, fieldOptions{})
 	assert.NoError(t, err)
 	assert.NotNil(t, target.(*AConfig).A)
 
@@ -436,7 +467,7 @@ func Test_extractFields(t *testing.T) {
 	target = &ConfigStruct{}
 
 	// withUntagged = true
-	gotFields, err := extractFields(true, prefix, target)
+	gotFields, err := extractFields(true, prefix, target, fieldOptions{})
 	assert.NoError(t, err)
 
 	expectedFields := []fieldInfo{
@@ -513,7 +544,7 @@ func Test_extractFields(t *testing.T) {
 	}
 
 	// withUntagged = false
-	gotFields, err = extractFields(false, prefix, target)
+	gotFields, err = extractFields(false, prefix, target, fieldOptions{})
 	assert.NoError(t, err)
 
 	expectedFields = []fieldInfo{

@@ -69,7 +69,7 @@ func String(cfg interface{}, withUntagged bool, formatters ...Formatter) (str st
 	}
 
 	var fields []fieldInfo
-	fields, err = extractFields(withUntagged, nil, cfg)
+	fields, err = extractFields(withUntagged, nil, cfg, fieldOptions{})
 	if err != nil {
 		return
 	}

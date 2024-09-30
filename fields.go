@@ -28,11 +28,16 @@ type fieldOptions struct {
 	source       string
 }
 
+// inherit copies the options from the parent.
+func (o *fieldOptions) inherit(parent fieldOptions) {
+	o.source = parent.source
+}
+
 var ErrInvalidStruct = errors.New("config must be a pointer to a struct")
 var ErrBadTags = errors.New("error parsing tags for field")
 
 // extractFields uses reflection to examine the struct and extract the fields.
-func extractFields(withUntagged bool, prefix []string, target interface{}) (fields []fieldInfo, err error) {
+func extractFields(withUntagged bool, prefix []string, target interface{}, parentOptions fieldOptions) (fields []fieldInfo, err error) {
 	if prefix == nil {
 		prefix = []string{}
 	}
@@ -78,7 +83,7 @@ func extractFields(withUntagged bool, prefix []string, target interface{}) (fiel
 		// Put together the field key and options.
 		var options fieldOptions
 		var keyPart string
-		keyPart, options, err = parseTag(tags)
+		keyPart, options, err = parseTag(tags, parentOptions)
 		if err != nil {
 			err = fmt.Errorf("%w %s: %s", ErrBadTags, fieldName, err)
 			return
@@ -127,7 +132,7 @@ func extractFields(withUntagged bool, prefix []string, target interface{}) (fiel
 
 			// Recursively extract fields from the embedded struct.
 			var innerFields []fieldInfo
-			innerFields, err = extractFields(withUntagged, innerPrefix, embeddedPtr)
+			innerFields, err = extractFields(withUntagged, innerPrefix, embeddedPtr, options)
 			if err != nil {
 				return
 			}
@@ -148,10 +153,13 @@ func extractFields(withUntagged bool, prefix []string, target interface{}) (fiel
 	return fields, nil
 }
 
-func parseTag(tag string) (key string, f fieldOptions, err error) {
+func parseTag(tag string, parentOptions fieldOptions) (key string, f fieldOptions, err error) {
 	if tag == "" {
 		return
 	}
+
+	// Inherit the parent options.
+	f.inherit(parentOptions)
 
 	// Split the tag into parts.
 	parts := strings.Split(tag, ",")

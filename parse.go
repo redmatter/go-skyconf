@@ -48,7 +48,7 @@ func Parse(ctx context.Context, cfg interface{}, withUntagged bool, sources ...S
 
 	// Get the list of fields from the configuration struct to process.
 	var fields []fieldInfo
-	fields, err = extractFields(withUntagged, nil, cfg)
+	fields, err = extractFields(withUntagged, nil, cfg, fieldOptions{})
 	if err != nil {
 		err = fmt.Errorf("failed to extract fields: %w", err)
 		return
