@@ -7,14 +7,25 @@ import (
 	ssmpkg "github.com/aws/aws-sdk-go-v2/service/ssm"
 )
 
-// Source sources config values from a configuration source.
-type Source interface {
-	// Source fetches the parameters from the source.
-	Source(ctx context.Context, params []string) (values map[string]string, err error)
-	// ParameterName returns the parameter name for the given parts.
+// Formatter is usually a source that formats the parameter name, but without having to fetch the parameters. It is not
+// necessary to instantiate it with a functioning "connection" to the source. It is used only for formatting the
+// parameter name. See String() in debug.go.
+type Formatter interface {
+	// ParameterName formats the parameter name.
 	ParameterName(parts []string) string
 	// ID returns the ID of the source.
 	ID() string
+}
+
+// Source can format a parameter name and fetch a set of parameters from a source.
+type Source interface {
+	// Source fetches the parameters from the source.
+	Source(ctx context.Context, params []string) (values map[string]string, err error)
+	// ID returns the ID of the source.
+	ID() string
+
+	// Formatter formats the parameter name.
+	Formatter
 }
 
 // ParseSSM parses configuration from AWS SSM into the provided struct, using parameters from the provided path.
