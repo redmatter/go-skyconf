@@ -34,6 +34,17 @@ func SSMSourceWithID(ssm *ssmpkg.Client, path, id string) Source {
 }
 
 func (s *ssmSource) Source(ctx context.Context, keys []string) (values map[string]string, err error) {
+	// Ensure there are keys to fetch
+	if len(keys) == 0 {
+		return
+	}
+
+	// Ensure the ssm client is not nil
+	if s.ssm == nil {
+		err = fmt.Errorf("ssm client is nil")
+		return
+	}
+
 	// Use GetParameters API to fetch the parameters
 	input := &ssmpkg.GetParametersInput{
 		Names:          keys,
