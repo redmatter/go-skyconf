@@ -119,7 +119,7 @@ func extractFields(withUntagged bool, prefix []string, target interface{}) (fiel
 
 			// If the field is anonymous, and it's set to flatten, we don't want to append the field key part.
 			innerPrefix := fieldKey
-			if structField.Anonymous && options.flatten {
+			if structField.Anonymous || options.flatten {
 				innerPrefix = prefix
 			}
 

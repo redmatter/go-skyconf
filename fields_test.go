@@ -426,8 +426,8 @@ func Test_extractFields(t *testing.T) {
 		Field7    int
 		Field8    time.Duration
 		Field9    int `sky:"-"`
-		Embedded1 `sky:",flatten"`
-		Embedded2 `sky:""`
+		Embedded1 `sky:""`
+		Embedded2
 
 		// Unexported fields are ignored
 		field10 string `sky:"field10"`
@@ -491,18 +491,21 @@ func Test_extractFields(t *testing.T) {
 			options:     fieldOptions{},
 		},
 		{
-			nameParts:   []string{"prefix", "Embedded2", "field1"},
+			nameParts:   []string{"prefix", "field1"},
 			structField: reflect.ValueOf("string"),
 			options:     fieldOptions{},
 		},
 		{
-			nameParts:   []string{"prefix", "Embedded2", "field2"},
+			nameParts:   []string{"prefix", "field2"},
 			structField: reflect.ValueOf(0),
 			options:     fieldOptions{},
 		},
 	}
 
-	assert.Equal(t, len(expectedFields), len(gotFields))
+	if !assert.Equal(t, len(expectedFields), len(gotFields)) {
+		return
+	}
+
 	for i, expectedField := range expectedFields {
 		assert.Equal(t, expectedField.nameParts, gotFields[i].nameParts)
 		assert.Equal(t, expectedField.structField.Type(), gotFields[i].structField.Type())
@@ -549,19 +552,12 @@ func Test_extractFields(t *testing.T) {
 			structField: reflect.ValueOf(0),
 			options:     fieldOptions{},
 		},
-		{
-			nameParts:   []string{"prefix", "Embedded2", "field1"},
-			structField: reflect.ValueOf("string"),
-			options:     fieldOptions{},
-		},
-		{
-			nameParts:   []string{"prefix", "Embedded2", "field2"},
-			structField: reflect.ValueOf(0),
-			options:     fieldOptions{},
-		},
 	}
 
-	assert.Equal(t, len(expectedFields), len(gotFields))
+	if !assert.Equal(t, len(expectedFields), len(gotFields)) {
+		return
+	}
+
 	for i, expectedField := range expectedFields {
 		assert.Equal(t, expectedField.nameParts, gotFields[i].nameParts)
 		assert.Equal(t, expectedField.structField.Type(), gotFields[i].structField.Type())
