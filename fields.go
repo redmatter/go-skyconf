@@ -154,12 +154,12 @@ func extractFields(withUntagged bool, prefix []string, target interface{}, paren
 }
 
 func parseTag(tag string, parentOptions fieldOptions) (key string, f fieldOptions, err error) {
+	// Inherit the parent options.
+	f.inherit(parentOptions)
+
 	if tag == "" {
 		return
 	}
-
-	// Inherit the parent options.
-	f.inherit(parentOptions)
 
 	// Split the tag into parts.
 	parts := strings.Split(tag, ",")
