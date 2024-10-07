@@ -83,3 +83,7 @@ func makeParameterName(path string, parts []string) string {
 func (s *ssmSource) ID() string {
 	return s.id
 }
+
+func (s *ssmSource) Refreshable() bool {
+	return true
+}

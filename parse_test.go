@@ -12,7 +12,7 @@ import (
 
 type mockParameterStore map[string]string
 
-func (ps mockParameterStore) Source(params []string) (values map[string]string, err error) {
+func (ps mockParameterStore) getValues(params []string) (values map[string]string, err error) {
 	if ps == nil {
 		err = errInvalidSource
 		return
@@ -36,30 +36,43 @@ func (ps mockParameterStore) Source(params []string) (values map[string]string, 
 	return
 }
 
+func (ps mockParameterStore) set(key, value string) {
+	ps[key] = value
+}
+
 type mockSource struct {
-	ps   mockParameterStore
-	path string
-	id   string
+	ps          mockParameterStore
+	path        string
+	id          string
+	refreshable bool
 }
 
 var errInvalidSource = fmt.Errorf("invalid source")
 
 var errMockSourceError = errors.New("mock source error")
 
-func (m mockSource) Source(_ context.Context, params []string) (values map[string]string, err error) {
-	return m.ps.Source(params)
+func (m *mockSource) Source(_ context.Context, params []string) (values map[string]string, err error) {
+	return m.ps.getValues(params)
 }
 
-func (m mockSource) ParameterName(parts []string) string {
+func (m *mockSource) ParameterName(parts []string) string {
 	return makeParameterName(m.path, parts)
 }
 
-func (m mockSource) ID() string {
+func (m *mockSource) ID() string {
 	if m.id != "" {
 		return m.id
 	}
 
 	return "mock"
+}
+
+func (m *mockSource) Refreshable() bool {
+	return m.refreshable
+}
+
+func (m *mockSource) set(key, value string) {
+	m.ps.set(key, value)
 }
 
 func TestParse(t *testing.T) {
@@ -73,7 +86,8 @@ func TestParse(t *testing.T) {
 
 		"/multi-source/global/param1": "global-value1",
 		"/multi-source/global/param2": "global-value2",
-		"/multi-source/local/param2":  "local-value2",
+
+		"/multi-source/local/param2": "local-value2",
 	}
 
 	type config1 struct {
@@ -123,7 +137,7 @@ func TestParse(t *testing.T) {
 			cfg: &struct {
 				Param1 string `sky:"an_error"`
 			}{},
-			sources: []Source{mockSource{
+			sources: []Source{&mockSource{
 				ps:   ps,
 				path: "/path/config1-values/",
 			}},
@@ -135,7 +149,7 @@ func TestParse(t *testing.T) {
 		{
 			name: "error setting field",
 			cfg:  &errorConfig{},
-			sources: []Source{mockSource{
+			sources: []Source{&mockSource{
 				ps:   ps,
 				path: "/path/error-config-values/",
 			}},
@@ -146,7 +160,7 @@ func TestParse(t *testing.T) {
 		{
 			name: "bad tags",
 			cfg:  &badTags{},
-			sources: []Source{mockSource{
+			sources: []Source{&mockSource{
 				ps:   ps,
 				path: "/path/bla/",
 			}},
@@ -159,7 +173,7 @@ func TestParse(t *testing.T) {
 			cfg: &struct {
 				Param1 int `sky:",default:BadValue"`
 			}{},
-			sources: []Source{mockSource{
+			sources: []Source{&mockSource{
 				ps: map[string]string{},
 			}},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -172,7 +186,7 @@ func TestParse(t *testing.T) {
 				Param1 string `sky:"param1,optional"`
 				Param2 string `sky:"param1,default:value2"`
 			}{},
-			sources: []Source{mockSource{
+			sources: []Source{&mockSource{
 				ps: map[string]string{},
 			}},
 			wantErr: assert.NoError,
@@ -182,7 +196,7 @@ func TestParse(t *testing.T) {
 			cfg: &struct {
 				Param1 string `sky:"param1"`
 			}{},
-			sources: []Source{mockSource{
+			sources: []Source{&mockSource{
 				ps: map[string]string{},
 			}},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -195,11 +209,11 @@ func TestParse(t *testing.T) {
 				Param1 string `sky:"param1"`
 			}{},
 			sources: []Source{
-				mockSource{
+				&mockSource{
 					ps: map[string]string{},
 					id: "source1",
 				},
-				mockSource{
+				&mockSource{
 					ps: map[string]string{},
 					id: "source2",
 				},
@@ -209,17 +223,31 @@ func TestParse(t *testing.T) {
 			},
 		},
 		{
+			name: "error if a specified source is not found",
+			cfg: &struct {
+				Param1 string `sky:"param1,source:source1"`
+			}{},
+			sources: []Source{
+				&mockSource{
+					ps: map[string]string{},
+				},
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.ErrorIs(t, err, ErrSourceNotFound)
+			},
+		},
+		{
 			name: "success with multiple sources",
 			cfg:  &multiSourceConfig{},
 			sources: []Source{
-				mockSource{
+				&mockSource{
 					ps: map[string]string{
 						"/path/source1-values/param1": "value1",
 					},
 					path: "/path/source1-values/",
 					id:   "source1",
 				},
-				mockSource{
+				&mockSource{
 					ps: map[string]string{
 						"/path/source2-values/param2": "value2",
 					},
@@ -238,12 +266,12 @@ func TestParse(t *testing.T) {
 			name: "success with layering sources",
 			cfg:  &layeredConfig{},
 			sources: []Source{
-				mockSource{
+				&mockSource{
 					ps:   ps,
 					path: "/multi-source/global/",
 					id:   "global",
 				},
-				mockSource{
+				&mockSource{
 					ps:   ps,
 					path: "/multi-source/local/",
 					id:   "local",
@@ -261,7 +289,7 @@ func TestParse(t *testing.T) {
 			cfg: &config1{
 				Param4: "value4",
 			},
-			sources: []Source{mockSource{
+			sources: []Source{&mockSource{
 				ps:   ps,
 				path: "/path/config1-values/",
 			}},
@@ -279,7 +307,7 @@ func TestParse(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := Parse(context.Background(), tt.cfg, true, tt.sources...)
+			_, err := Parse(context.Background(), tt.cfg, true, tt.sources...)
 			if tt.wantErr == nil {
 				tt.wantErr = assert.NoError
 			}

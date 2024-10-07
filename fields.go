@@ -26,6 +26,7 @@ type fieldOptions struct {
 	optional     bool
 	flatten      bool
 	source       string
+	refresh      time.Duration
 }
 
 // inherit copies the options from the parent.
@@ -195,6 +196,12 @@ func parseTag(tag string, parentOptions fieldOptions) (key string, f fieldOption
 				f.defaultValue = val
 			case "source":
 				f.source = val
+			case "refresh": // refresh is a duration
+				f.refresh, err = time.ParseDuration(val)
+				if err != nil {
+					err = fmt.Errorf("invalid duration %q: %w", val, err)
+					return
+				}
 			}
 		}
 	}
