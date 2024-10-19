@@ -67,18 +67,13 @@ type refreshedFields struct {
 	valueHashes []uint32 // CRC32 of the values
 }
 
-type locker interface {
-	Lock()
-	Unlock()
-}
-
 // updater is a struct that holds the refresh information for the fields that have opted to be refreshed.
 type updater struct {
 	timings map[time.Duration]map[Source]*refreshedFields
 	raw     []*refreshedFieldSource
 	updates chan string
 	clock   cfclock.Clock
-	locker  locker
+	locker  sync.Locker
 }
 
 var ErrMissingKeyOnRefresh = errors.New("missing key on refresh")
@@ -89,7 +84,7 @@ func (u *updater) setupLock(i interface{}) {
 	}
 
 	// Check if the interface is a locker
-	if l, ok := i.(locker); ok {
+	if l, ok := i.(sync.Locker); ok {
 		u.locker = l
 	} else {
 		u.locker = nilLock
