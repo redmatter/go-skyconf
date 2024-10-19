@@ -36,7 +36,12 @@ func (a anyFormatter) ID() string {
 	return "anyOf"
 }
 
-// String returns a string representation of the provided configuration struct.
+func (a anyFormatter) Refreshable() bool {
+	return true
+}
+
+// String returns a string representation of the provided configuration struct, describing source and parameter name for
+// each field.
 func String(cfg interface{}, withUntagged bool, sources ...Source) (str string, err error) {
 	// Ensure we have a formatter.
 	if len(sources) == 0 {

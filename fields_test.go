@@ -474,62 +474,62 @@ func Test_extractFields(t *testing.T) {
 		{
 			nameParts:   []string{"prefix", "Field1"},
 			structField: reflect.ValueOf(""),
-			options:     fieldOptions{},
+			options:     fieldOptions{id: "Field1"},
 		},
 		{
 			nameParts:   []string{"prefix", "field2"},
 			structField: reflect.ValueOf(0),
-			options:     fieldOptions{optional: true},
+			options:     fieldOptions{optional: true, id: "field2"},
 		},
 		{
 			nameParts:   []string{"prefix", "field3"},
 			structField: reflect.ValueOf(false),
-			options:     fieldOptions{flatten: true},
+			options:     fieldOptions{flatten: true, id: "field3"},
 		},
 		{
 			nameParts:   []string{"prefix", "field4"},
 			structField: reflect.ValueOf(""),
-			options:     fieldOptions{defaultValue: "default"},
+			options:     fieldOptions{defaultValue: "default", id: "field4"},
 		},
 		{
 			nameParts:   []string{"prefix", "field5"},
 			structField: reflect.ValueOf(""),
-			options:     fieldOptions{source: "source"},
+			options:     fieldOptions{source: "source", id: "field5"},
 		},
 		{
 			nameParts:   []string{"prefix", "Field6"},
 			structField: reflect.ValueOf(""),
-			options:     fieldOptions{},
+			options:     fieldOptions{id: "Field6"},
 		},
 		{
 			nameParts:   []string{"prefix", "Field7"},
 			structField: reflect.ValueOf(0),
-			options:     fieldOptions{},
+			options:     fieldOptions{id: "Field7"},
 		},
 		{
 			nameParts:   []string{"prefix", "Field8"},
 			structField: reflect.ValueOf(time.Duration(0)),
-			options:     fieldOptions{},
+			options:     fieldOptions{id: "Field8"},
 		},
 		{
 			nameParts:   []string{"prefix", "embedded1_field1"},
 			structField: reflect.ValueOf("string"),
-			options:     fieldOptions{},
+			options:     fieldOptions{id: "embedded1_field1"},
 		},
 		{
 			nameParts:   []string{"prefix", "embedded1_field2"},
 			structField: reflect.ValueOf(0),
-			options:     fieldOptions{},
+			options:     fieldOptions{id: "embedded1_field2"},
 		},
 		{
 			nameParts:   []string{"prefix", "field1"},
 			structField: reflect.ValueOf("string"),
-			options:     fieldOptions{},
+			options:     fieldOptions{id: "field1"},
 		},
 		{
 			nameParts:   []string{"prefix", "field2"},
 			structField: reflect.ValueOf(0),
-			options:     fieldOptions{},
+			options:     fieldOptions{id: "field2"},
 		},
 	}
 
@@ -551,37 +551,37 @@ func Test_extractFields(t *testing.T) {
 		{
 			nameParts:   []string{"prefix", "Field1"},
 			structField: reflect.ValueOf(""),
-			options:     fieldOptions{},
+			options:     fieldOptions{id: "Field1"},
 		},
 		{
 			nameParts:   []string{"prefix", "field2"},
 			structField: reflect.ValueOf(0),
-			options:     fieldOptions{optional: true},
+			options:     fieldOptions{optional: true, id: "field2"},
 		},
 		{
 			nameParts:   []string{"prefix", "field3"},
 			structField: reflect.ValueOf(false),
-			options:     fieldOptions{flatten: true},
+			options:     fieldOptions{flatten: true, id: "field3"},
 		},
 		{
 			nameParts:   []string{"prefix", "field4"},
 			structField: reflect.ValueOf(""),
-			options:     fieldOptions{defaultValue: "default"},
+			options:     fieldOptions{defaultValue: "default", id: "field4"},
 		},
 		{
 			nameParts:   []string{"prefix", "field5"},
 			structField: reflect.ValueOf(""),
-			options:     fieldOptions{source: "source"},
+			options:     fieldOptions{source: "source", id: "field5"},
 		},
 		{
 			nameParts:   []string{"prefix", "embedded1_field1"},
 			structField: reflect.ValueOf("string"),
-			options:     fieldOptions{},
+			options:     fieldOptions{id: "embedded1_field1"},
 		},
 		{
 			nameParts:   []string{"prefix", "embedded1_field2"},
 			structField: reflect.ValueOf(0),
-			options:     fieldOptions{},
+			options:     fieldOptions{id: "embedded1_field2"},
 		},
 	}
 

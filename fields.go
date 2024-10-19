@@ -26,6 +26,8 @@ type fieldOptions struct {
 	optional     bool
 	flatten      bool
 	source       string
+	refresh      time.Duration
+	id           string
 }
 
 // inherit copies the options from the parent.
@@ -94,6 +96,11 @@ func extractFields(withUntagged bool, prefix []string, target interface{}, paren
 			keyPart = fieldName
 		}
 
+		// If a field-id was not set, use the key part.
+		if options.id == "" {
+			options.id = keyPart
+		}
+
 		// Make the field key by appending the field key part to the prefix.
 		// This might be ignored if the field is flattened.
 		fieldKey := append(prefix, keyPart)
@@ -153,6 +160,7 @@ func extractFields(withUntagged bool, prefix []string, target interface{}, paren
 	return fields, nil
 }
 
+// parseTag parses the tag and returns the key and options.
 func parseTag(tag string, parentOptions fieldOptions) (key string, f fieldOptions, err error) {
 	// Inherit the parent options.
 	f.inherit(parentOptions)
@@ -195,6 +203,14 @@ func parseTag(tag string, parentOptions fieldOptions) (key string, f fieldOption
 				f.defaultValue = val
 			case "source":
 				f.source = val
+			case "refresh": // refresh is a duration
+				f.refresh, err = time.ParseDuration(val)
+				if err != nil || f.refresh <= 0 {
+					err = fmt.Errorf("invalid duration %q: %w", val, err)
+					return
+				}
+			case "id":
+				f.id = val
 			}
 		}
 	}

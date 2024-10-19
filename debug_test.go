@@ -44,9 +44,9 @@ func TestString(t *testing.T) {
 					SSMSourceWithID(nil, "/path/region1", "regional"),
 				},
 			},
-			wantStr: "regional:/path/region1/db/host -> {defaultValue:localhost optional:false flatten:false source:region}\n" +
-				"anyOf:[ global:/path/global/db/port, regional:/path/region1/db/port ] -> {defaultValue:5432 optional:true flatten:false source:}\n" +
-				"global:/path/global/db/password -> {defaultValue: optional:false flatten:false source:global}",
+			wantStr: "regional:/path/region1/db/host -> {defaultValue:localhost optional:false flatten:false source:region refresh:0 id:Host}\n" +
+				"anyOf:[ global:/path/global/db/port, regional:/path/region1/db/port ] -> {defaultValue:5432 optional:true flatten:false source: refresh:0 id:Port}\n" +
+				"global:/path/global/db/password -> {defaultValue: optional:false flatten:false source:global refresh:0 id:Password}",
 			wantErr: assert.NoError,
 		},
 	}

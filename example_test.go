@@ -28,7 +28,7 @@ func ExampleParse() {
 	}{}
 
 	// Parse database configuration from SSM
-	err := Parse(ctx, &cfg, false, SSMSource(ssm, os.Getenv("APP_SSM_PATH")+"database/"))
+	_, err := Parse(ctx, &cfg, false, SSMSource(ssm, os.Getenv("APP_SSM_PATH")+"database/"))
 	if err != nil {
 		log.Fatalln("failed to parse configuration:", err)
 	}
