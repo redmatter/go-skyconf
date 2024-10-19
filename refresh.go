@@ -107,7 +107,7 @@ func (u *updater) Refresh(ctx context.Context, ef func(err error)) <-chan string
 
 	// Initialise the clock
 	if u.clock == nil {
-		u.clock = cfclock.NewClock()
+		u.clock = newJitterTickerClock()
 	}
 
 	// When a timer ticks, send the ticker-channel to a channel
