@@ -19,8 +19,6 @@ type Source interface {
 	ID() string
 }
 
-type RefreshFunc func(ctx context.Context, ef func(err error)) (cancel func())
-
 // Refresher refreshes configuration at specified intervals.
 type Refresher interface {
 	// Refresh starts a new goroutine that updates the configuration at specified intervals until the context is

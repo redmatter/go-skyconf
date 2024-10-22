@@ -36,7 +36,7 @@ func ExampleParse() {
 	// Use the configuration
 }
 
-func ExampleRefresher_Refresh() {
+func ExampleRefresher() {
 	// Initialise SSM client using aws-sdk-go-v2
 	var ssm *ssmpkg.Client
 
