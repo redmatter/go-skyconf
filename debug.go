@@ -84,14 +84,14 @@ func String(cfg interface{}, withUntagged bool, sources ...Source) (str string, 
 	first := true
 	for _, field := range fields {
 		if !first {
-			sb.WriteString("\n")
+			sb.Write([]byte{'\n'})
 		}
 
 		if err = format(field.options.source, field.nameParts, &sb); err != nil {
 			return
 		}
 		sb.WriteString(" -> ")
-		sb.WriteString(fmt.Sprintf("%+v", field.options))
+		sb.WriteString(field.options.String())
 		first = false
 	}
 

@@ -30,6 +30,11 @@ type fieldOptions struct {
 	id           string
 }
 
+func (o *fieldOptions) String() string {
+	return fmt.Sprintf(`{defaultValue:%s optional:%t flatten:%t source:%s refresh:%s id:%s}`,
+		o.defaultValue, o.optional, o.flatten, o.source, o.refresh, o.id)
+}
+
 // inherit copies the options from the parent.
 func (o *fieldOptions) inherit(parent fieldOptions) {
 	o.source = parent.source
