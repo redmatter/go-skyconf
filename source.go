@@ -45,23 +45,33 @@ func (s *ssmSource) Source(ctx context.Context, keys []string) (values map[strin
 		return
 	}
 
-	// Use GetParameters API to fetch the parameters
-	input := &ssmpkg.GetParametersInput{
-		Names:          keys,
-		WithDecryption: aws.Bool(true),
-	}
+	// Loop over the keys in batches of 10; AWS SSM GetParameters API has a limit of 10 parameters per request
+	for i := 0; i < len(keys); i += 10 {
+		end := i + 10
+		if end > len(keys) {
+			end = len(keys)
+		}
 
-	var output *ssmpkg.GetParametersOutput
-	output, err = s.ssm.GetParameters(ctx, input)
-	if err != nil {
-		err = fmt.Errorf("failed to get parameters: %w", err)
-		return
-	}
+		// Use GetParameters API to fetch the parameters
+		input := &ssmpkg.GetParametersInput{
+			Names:          keys[i:end],
+			WithDecryption: aws.Bool(true),
+		}
 
-	// Map the parameters for easier access
-	values = make(map[string]string, len(output.Parameters))
-	for _, p := range output.Parameters {
-		values[aws.ToString(p.Name)] = aws.ToString(p.Value)
+		var output *ssmpkg.GetParametersOutput
+		output, err = s.ssm.GetParameters(ctx, input)
+		if err != nil {
+			err = fmt.Errorf("failed to get parameters: %w", err)
+			return
+		}
+
+		// Map the parameters for easier access
+		if values == nil {
+			values = make(map[string]string, len(output.Parameters))
+		}
+		for _, p := range output.Parameters {
+			values[aws.ToString(p.Name)] = aws.ToString(p.Value)
+		}
 	}
 
 	return
