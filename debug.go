@@ -41,8 +41,8 @@ func (a anyFormatter) Refreshable() bool {
 }
 
 // String returns a string representation of the provided configuration struct, describing source and parameter name for
-// each field.
-func String(cfg interface{}, withUntagged bool, sources ...Source) (str string, err error) {
+// each field. If withCurrentValue is true, the current value of the field is also included.
+func String(cfg interface{}, withUntagged bool, withCurrentValue bool, sources ...Source) (str string, err error) {
 	// Ensure we have a formatter.
 	if len(sources) == 0 {
 		err = fmt.Errorf("no sources provided")
@@ -92,6 +92,12 @@ func String(cfg interface{}, withUntagged bool, sources ...Source) (str string, 
 		}
 		sb.WriteString(" -> ")
 		sb.WriteString(field.options.String())
+
+		if withCurrentValue {
+			sb.WriteString(" = ")
+			sb.WriteString(fmt.Sprintf("%v", field.structField.Interface()))
+		}
+
 		first = false
 	}
 

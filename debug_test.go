@@ -7,9 +7,10 @@ import (
 
 func TestString(t *testing.T) {
 	type args struct {
-		cfg          interface{}
-		withUntagged bool
-		sources      []Source
+		cfg              interface{}
+		withUntagged     bool
+		withCurrentValue bool
+		sources          []Source
 	}
 	tests := []struct {
 		name    string
@@ -20,9 +21,10 @@ func TestString(t *testing.T) {
 		{
 			name: "no sources",
 			args: args{
-				cfg:          struct{}{},
-				withUntagged: false,
-				sources:      nil,
+				cfg:              struct{}{},
+				withUntagged:     false,
+				withCurrentValue: false,
+				sources:          nil,
 			},
 			wantStr: "",
 			wantErr: assert.Error,
@@ -38,7 +40,8 @@ func TestString(t *testing.T) {
 						Password string `sky:",source:global"`
 					} `sky:"db"`
 				}{},
-				withUntagged: false,
+				withUntagged:     false,
+				withCurrentValue: false,
 				sources: []Source{
 					SSMSourceWithID(nil, "/path/global", "global"),
 					SSMSourceWithID(nil, "/path/region1", "regional"),
@@ -49,11 +52,29 @@ func TestString(t *testing.T) {
 				"global:/path/global/db/password -> {defaultValue: optional:false flatten:false source:global refresh:0s id:Password}",
 			wantErr: assert.NoError,
 		},
+		{
+			name: "single formatter with current value",
+			args: args{
+				cfg: &struct {
+					Level string `sky:",source:regional"`
+				}{
+					Level: "info",
+				},
+				withUntagged:     false,
+				withCurrentValue: true,
+				sources: []Source{
+					SSMSourceWithID(nil, "/path/global", "global"),
+					SSMSourceWithID(nil, "/path/region1", "regional"),
+				},
+			},
+			wantStr: "regional:/path/region1/level -> {defaultValue: optional:false flatten:false source:regional refresh:0s id:Level} = info",
+			wantErr: assert.NoError,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotStr, err := String(tt.args.cfg, tt.args.withUntagged, tt.args.sources...)
+			gotStr, err := String(tt.args.cfg, tt.args.withUntagged, tt.args.withCurrentValue, tt.args.sources...)
 			if !tt.wantErr(t, err) {
 				return
 			}
