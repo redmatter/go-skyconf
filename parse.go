@@ -175,7 +175,7 @@ func Parse(ctx context.Context, cfg interface{}, withUntagged bool, sources ...S
 
 			// Process the field using the value obtained from the source
 			if err = processFieldValue(false, value, field.structField); err != nil {
-				err = fmt.Errorf("%w of type %s: %w", ErrBadFieldValue, field.structField.Type(), err)
+				err = fmt.Errorf("%w of type %s; parameter-key: %s; %w", ErrBadFieldValue, field.structField.Type(), key, err)
 				return
 			}
 

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	ssmpkg "github.com/aws/aws-sdk-go-v2/service/ssm"
-	"log"
 	"strings"
 )
 
@@ -74,8 +73,6 @@ func (s *ssmSource) Source(ctx context.Context, keys []string) (values map[strin
 			values[aws.ToString(p.Name)] = aws.ToString(p.Value)
 		}
 	}
-
-	log.Printf("SSM values: %v", values)
 
 	return
 }
