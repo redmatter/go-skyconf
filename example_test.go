@@ -163,7 +163,7 @@ func ExampleRefresher() {
 	cancel()
 }
 
-// Example_multipleSources demonstrates how to use go-skyconf to parse configuration from multiple hierarchical sources in AWS SSM.
+// Example demonstrates how to use go-skyconf to parse configuration from multiple hierarchical sources in AWS SSM.
 //
 // This example assumes a working AWS session and that the following parameters exist in AWS SSM:
 //

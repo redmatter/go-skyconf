@@ -75,7 +75,7 @@ When `sky.Parse` is called on a `Config` struct:
 
 This allows different parts of your application to be configured from different parameter hierarchies, promoting separation of concerns and reusability of configuration.
 
-For a more detailed example of using multiple sources, see the [multi-source example](example_test.go) (`Example_multipleSources`).
+For a more detailed example of using multiple sources, see the `Example (MultipleSources)` section below.
 
 ## Acknowledgements
 
