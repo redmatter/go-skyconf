@@ -1,5 +1,7 @@
 # Ský Config for Go
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/redmatter/go-skyconf.svg)](https://pkg.go.dev/github.com/redmatter/go-skyconf)
+
 Ský Config is a configuration library for Go. It can be used to load configuration
 values from cloud based parameter stores such as AWS SSM Parameter Store.
 
